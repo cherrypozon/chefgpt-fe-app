@@ -1,0 +1,5 @@
+export { default as FoodWasteChart } from './FoodWasteChart'
+export { default as GuestNationalityChart } from './GuestNationalityChart'
+export { default as DailyCoversChart } from './DailyCoversChart'
+export { default as WasteTrendChart } from './WasteTrendChart'
+export { default as TopRatedDishesChart } from './TopRatedDishesChart'
