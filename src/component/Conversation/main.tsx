@@ -1,14 +1,39 @@
 'use client'
 
-import { useState, useRef, useEffect } from 'react'
-import { Square, FileText, ChevronRight, Send, Mic, Paperclip, ChevronDown, X, ImageIcon } from 'lucide-react'
-import type { Message, Artifact, ConversationProps } from '../../type/model'
-import { CHAT_HISTORY_DATA, SHORTCUTS, CONTEXT_TAGS, MODELS } from '../../helper/constant'
-import { createUserMessage, createAiMessage } from '../../helper/utils'
+import { useRef, useEffect } from 'react'
+import { Square, FileText, ChevronRight, Send, Mic, Paperclip, ChevronDown, X, ImageIcon, AlertTriangle } from 'lucide-react'
 import ChatArtifactModal from '../Modal/ChatArtifactModal'
 import Header from '../Header/main'
 import LiveContextFeed from '../Modal/LiveEventModal'
+import {
+  useAppDispatch,
+  useAppSelector,
+  chatThunks,
+  setInput,
+  setModelOpen,
+  setSelectedModel,
+  addAttachedFiles,
+  removeAttachedFile,
+  clearAttachedFiles,
+  toggleRecording,
+  setActiveArtifact,
+  clearActiveArtifact,
+} from '../../redux'
+import type { RootState } from '../../redux/store'
 
+// Static UI config (shortcuts and context tags)
+const SHORTCUTS = [
+  { icon: FileText,      text: "Optimize tonight's menu" },
+  { icon: AlertTriangle, text: 'Fix high-waste dishes', iconClassName: 'text-green-500' },
+  { icon: FileText,      text: 'Generate PO'             },
+  { icon: FileText,      text: 'Event-based suggestions' },
+]
+
+const CONTEXT_TAGS = [
+  { icon: '🗓️', text: 'Nearby Events (3 days)' },
+  { icon: '⭐', text: 'Recent Dish Feedback'    },
+  { icon: '👥', text: "Today's Guest Mix"        },
+]
 
 const FilePill = ({ name, onRemove }: { name: string; onRemove: () => void }) => (
   <div className="flex items-center gap-1.5 px-2.5 py-1 bg-background border border-borderGrey text-xs text-darkGrey font-mono max-w-[160px]">
@@ -20,26 +45,30 @@ const FilePill = ({ name, onRemove }: { name: string; onRemove: () => void }) =>
   </div>
 )
 
-const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
-  const [messages,       setMessages]       = useState<Message[]>(CHAT_HISTORY_DATA[activeChatId] ?? CHAT_HISTORY_DATA['chat-1'])
-  const [input,          setInput]          = useState('')
-  const [isTyping,       setIsTyping]       = useState(false)
-  const [activeArtifact, setActiveArtifact] = useState<Artifact | null>(null)
-  const [prevChatId,     setPrevChatId]     = useState(activeChatId)
-  const [selectedModel,  setSelectedModel]  = useState(MODELS[0])
-  const [modelOpen,      setModelOpen]      = useState(false)
-  const [attachedFiles,  setAttachedFiles]  = useState<string[]>([])
-  const [isRecording,    setIsRecording]    = useState(false)
+const Conversation = () => {
+  const dispatch = useAppDispatch()
+  
+  // Redux state
+  const messages = useAppSelector((state: RootState) => state.chat.messages)
+  const isTyping = useAppSelector((state: RootState) => state.chat.isTyping)
+  const selectedModel = useAppSelector((state: RootState) => state.chat.selectedModel)
+  const models = useAppSelector((state: RootState) => state.chat.models)
+  const activeChatId = useAppSelector((state: RootState) => state.chat.activeChatId)
+  const input = useAppSelector((state: RootState) => state.ui.input)
+  const modelOpen = useAppSelector((state: RootState) => state.ui.modelOpen)
+  const attachedFiles = useAppSelector((state: RootState) => state.ui.attachedFiles)
+  const isRecording = useAppSelector((state: RootState) => state.ui.isRecording)
+  const activeArtifact = useAppSelector((state: RootState) => state.ui.activeArtifact)
 
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const fileInputRef   = useRef<HTMLInputElement>(null)
-  const modelRef       = useRef<HTMLDivElement>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const modelRef = useRef<HTMLDivElement>(null)
 
-  if (prevChatId !== activeChatId) {
-    setPrevChatId(activeChatId)
-    setMessages(CHAT_HISTORY_DATA[activeChatId] ?? CHAT_HISTORY_DATA['chat-1'])
-    setActiveArtifact(null)
-  }
+  // Fetch messages when chat changes
+  useEffect(() => {
+    dispatch(chatThunks.fetchMessages(activeChatId))
+    dispatch(clearActiveArtifact())
+  }, [activeChatId, dispatch])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -48,47 +77,30 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (modelRef.current && !modelRef.current.contains(e.target as Node)) {
-        setModelOpen(false)
+        dispatch(setModelOpen(false))
       }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [])
+  }, [dispatch])
 
   const handleSend = (text: string) => {
     if (!text.trim()) return
-    const userMsg = createUserMessage(text)
-    setMessages(prev => [...prev, userMsg])
-    setInput('')
-    setAttachedFiles([])
-    setIsTyping(true)
-
-    setTimeout(() => {
-      const lower = text.toLowerCase()
-      let response = "I've noted your request. Is there anything else you'd like me to look into?"
-      let isArtifact = false
-      let title = 'Detailed Analysis'
-
-      if (lower.includes('optimize') || lower.includes('menu') || lower.includes('waste') || lower.includes('fix')) {
-        response = "Based on the data, here is a detailed breakdown of the waste patterns and how we can optimize the menu for tonight.\n\nFirst, we notice that Papaitan has an 81% waste rate, which is significantly higher than the average. This could be due to portion sizes or guest preferences.\n\nSecond, Callos is also flagged at 83% waste. We should consider reducing the batch size for these dishes.\n\nFinally, with the music festival nearby, we can expect a younger demographic who might prefer quick bites over heavy meals. Let's adjust the prep accordingly."
-        isArtifact = true
-        title = 'Menu Optimization Plan'
-      } else if (lower.includes('po') || lower.includes('generate')) {
-        response = "Here is the generated Purchase Order based on current inventory levels and projected demand for the weekend.\n\n1. 50kg Chicken Breast (Supplier A)\n2. 20kg Beef Brisket (Supplier B)\n3. 15kg Assorted Vegetables (Supplier C)\n\nPlease review the quantities before I send this to the suppliers."
-        isArtifact = true
-        title = 'Purchase Order #4029'
-      }
-
-      const aiMsg = createAiMessage(response, isArtifact, title)
-      setMessages(prev => [...prev, aiMsg])
-      if (isArtifact) setActiveArtifact({ id: aiMsg.id, text: response, title })
-      setIsTyping(false)
-    }, 1500)
+    
+    dispatch(chatThunks.sendMessage({
+      chatId: activeChatId,
+      text,
+      modelId: selectedModel?.id || 'orchestrator',
+      attachedFiles,
+    }))
+    
+    dispatch(setInput(''))
+    dispatch(clearAttachedFiles())
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? []).map(f => f.name)
-    setAttachedFiles(prev => [...prev, ...files])
+    dispatch(addAttachedFiles(files))
     e.target.value = ''
   }
 
@@ -118,7 +130,7 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
               </div>
             </div>
 
-            {messages.map((msg, idx) => (
+            {messages.map((msg, idx: number) => (
               <div key={msg.id} className="flex flex-col">
 
                 {msg.sender === 'ai' && (
@@ -157,12 +169,12 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
                     {msg.isArtifact ? (
                       <div
                         className="p-3 border border-corePurple bg-background cursor-pointer hover:opacity-90 transition-opacity flex items-center justify-between"
-                        onClick={() => setActiveArtifact({ id: msg.id, text: msg.text, title: msg.title ?? '' })}
+                        onClick={() => dispatch(setActiveArtifact({ id: msg.id, text: msg.text, title: msg.artifactTitle ?? '' }))}
                       >
                         <div className="flex items-center gap-3">
                           <FileText size={18} className="text-corePurple" />
                           <div>
-                            <p className="font-semibold text-xs text-text">{msg.title}</p>
+                            <p className="font-semibold text-xs text-text">{msg.artifactTitle}</p>
                             <p className="text-[10px] text-darkGrey">Click to view document</p>
                           </div>
                         </div>
@@ -223,14 +235,9 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
                 {CONTEXT_TAGS.map((tag, i) => (
                   <div
                     key={i}
-                    className={[
-                      'flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono border',
-                      tag.isMore
-                        ? 'border-corePurple/30 text-[#C2A3FF] bg-corePurple/10'
-                        : 'bg-cards text-darkGrey border-borderGrey',
-                    ].join(' ')}
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-mono border bg-cards text-darkGrey border-borderGrey"
                   >
-                    {!tag.isMore && <span>{tag.icon}</span>}
+                    <span>{tag.icon}</span>
                     {tag.text}
                   </div>
                 ))}
@@ -244,7 +251,7 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
               {attachedFiles.length > 0 && (
                 <div className="flex flex-wrap gap-2 px-4 pt-3">
                   {attachedFiles.map(name => (
-                    <FilePill key={name} name={name} onRemove={() => setAttachedFiles(p => p.filter(f => f !== name))} />
+                    <FilePill key={name} name={name} onRemove={() => dispatch(removeAttachedFile(name))} />
                   ))}
                 </div>
               )}
@@ -253,7 +260,7 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
               <textarea
                 rows={3}
                 value={input}
-                onChange={e => setInput(e.target.value)}
+                onChange={e => dispatch(setInput(e.target.value))}
                 onKeyDown={e => {
                   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(input) }
                 }}
@@ -270,11 +277,11 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
                   {/* Model selector */}
                   <div className="relative" ref={modelRef}>
                     <button
-                      onClick={() => setModelOpen(p => !p)}
+                      onClick={() => dispatch(setModelOpen(!modelOpen))}
                       className="flex items-center gap-1.5 px-2.5 py-1.5 text-[11px] font-mono text-darkGrey hover:text-text hover:bg-background border border-transparent hover:border-borderGrey transition-all rounded"
                     >
                       <Square size={9} className="fill-corePurple text-corePurple shrink-0" />
-                      {selectedModel.label}
+                      {selectedModel?.label || 'Select Model'}
                       <ChevronDown size={11} className={`transition-transform duration-150 ${modelOpen ? 'rotate-180' : ''}`} />
                     </button>
 
@@ -283,20 +290,20 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
                         <p className="text-[10px] font-medium uppercase tracking-widest text-darkGrey px-3 pt-3 pb-1.5">
                           Select Model
                         </p>
-                        {MODELS.map(model => (
+                        {models.map(model => (
                           <button
                             key={model.id}
-                            onClick={() => { setSelectedModel(model); setModelOpen(false) }}
+                            onClick={() => { dispatch(setSelectedModel(model)); dispatch(setModelOpen(false)) }}
                             className={[
                               'w-full flex items-start gap-2.5 px-3 py-2.5 text-left transition-colors',
-                              selectedModel.id === model.id
+                              selectedModel?.id === model.id
                                 ? 'bg-corePurple/10 text-corePurple'
                                 : 'hover:bg-background text-text',
                             ].join(' ')}
                           >
                             <Square
                               size={9}
-                              className={`mt-1 shrink-0 ${selectedModel.id === model.id ? 'fill-corePurple text-corePurple' : 'fill-darkGrey text-darkGrey'}`}
+                              className={`mt-1 shrink-0 ${selectedModel?.id === model.id ? 'fill-corePurple text-corePurple' : 'fill-darkGrey text-darkGrey'}`}
                             />
                             <div>
                               <p className="text-[12px] font-semibold leading-none">{model.label}</p>
@@ -332,7 +339,7 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
                 {/* Right — voice + send */}
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setIsRecording(p => !p)}
+                    onClick={() => dispatch(toggleRecording())}
                     title="Voice mode"
                     className={[
                       'p-1.5 transition-colors rounded',
@@ -358,7 +365,7 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
 
             {/* Hint */}
             <p className="text-[11px] text-darkGrey mt-2 text-center font-mono font-semibold">
-              Enter to send · Shift+Enter for new line · {selectedModel.label} active
+              Enter to send · Shift+Enter for new line · {selectedModel?.label || 'Orchestrator'} active
             </p>
           </div>
         </div>
@@ -368,7 +375,7 @@ const Conversation: React.FC<ConversationProps> = ({ activeChatId }) => {
           {activeArtifact ? (
             <ChatArtifactModal
               artifact={activeArtifact}
-              onClose={() => setActiveArtifact(null)}
+              onClose={() => dispatch(clearActiveArtifact())}
             />
           ) : (
             <LiveContextFeed />

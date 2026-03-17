@@ -1,16 +1,42 @@
 'use client'
 
-import { useState } from 'react'
-import { FileText, Upload } from 'lucide-react'
+import { useEffect } from 'react'
+import { FileText, Upload, Check, AlertTriangle, X } from 'lucide-react'
 import MainModal from '../Modal/MainModal'
 import Header from '../Header/main'
-import type { SafetyCheck } from '../../type/model'
-import { SAFETY_CHECKS, COMPLIANCE_STATS, STATUS_CONFIG } from '../../helper/constant'
+import {
+  useAppDispatch,
+  useAppSelector,
+  setActiveModal,
+  closeModal,
+  setSelectedCheck,
+  complianceThunks,
+} from '../../redux'
+import type { RootState, SafetyCheck } from '../../redux'
 
-/* \u2500\u2500 Component \u2500\u2500 */
+// Status config for icons and colors
+const STATUS_CONFIG: Record<SafetyCheck['status'], { textColor: string; bgColor: string; Icon: React.ComponentType<{ size?: number }> }> = {
+  pass:    { textColor: 'text-emerald-400', bgColor: 'bg-emerald-500/10', Icon: Check         },
+  warning: { textColor: 'text-amber-400',   bgColor: 'bg-amber-500/10',   Icon: AlertTriangle },
+  fail:    { textColor: 'text-red-400',     bgColor: 'bg-red-500/10',     Icon: X             },
+}
+
 const Compliance = () => {
-  const [activeModal,   setActiveModal]   = useState<'report' | 'history' | 'log' | null>(null)
-  const [selectedCheck, setSelectedCheck] = useState<SafetyCheck | null>(null)
+  const dispatch = useAppDispatch()
+  const activeModal = useAppSelector((state: RootState) => state.ui.activeModal)
+  const selectedCheck = useAppSelector((state: RootState) => state.compliance.selectedCheck)
+  const stats = useAppSelector((state: RootState) => state.compliance.stats)
+  const safetyChecks = useAppSelector((state: RootState) => state.compliance.safetyChecks)
+  const reportTypes = useAppSelector((state: RootState) => state.compliance.reportTypes)
+  const dateRanges = useAppSelector((state: RootState) => state.compliance.dateRanges)
+
+  // Fetch data on mount
+  useEffect(() => {
+    dispatch(complianceThunks.fetchStats())
+    dispatch(complianceThunks.fetchSafetyChecks())
+    dispatch(complianceThunks.fetchReportTypes())
+    dispatch(complianceThunks.fetchDateRanges())
+  }, [dispatch])
 
   return (
     <div className="flex flex-col h-full w-full bg-background">
@@ -20,7 +46,7 @@ const Compliance = () => {
         subtitle="INSPECTION CHECKPOINTS"
         rightContent={
           <button
-            onClick={() => setActiveModal('report')}
+            onClick={() => dispatch(setActiveModal('report'))}
             className="px-6 py-3 flex items-center gap-2 font-semibold text-white bg-corePurple hover:opacity-90 transition-opacity"
           >
             <FileText size={18} />
@@ -32,7 +58,7 @@ const Compliance = () => {
       {/* ── Stat cards (fixed) ── */}
       <div className="p-6 pb-0 max-w-7xl mx-auto w-full shrink-0">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {COMPLIANCE_STATS.map((stat, i) => (
+          {stats.map((stat, i) => (
             <div key={i} className={`p-5 border ${stat.bgColor} ${stat.borderColor}`}>
               <p className={`text-[10px] font-semibold uppercase tracking-widest mb-1.5 ${stat.textColor}`}>
                 {stat.label}
@@ -48,7 +74,7 @@ const Compliance = () => {
         <div className="flex items-center justify-between">
           <h3 className="text-base font-semibold text-text">Recent Checks</h3>
           <button
-            onClick={() => setActiveModal('history')}
+            onClick={() => dispatch(setActiveModal('history'))}
             className="text-xs font-semibold text-corePurple hover:underline"
           >
             View All History
@@ -62,7 +88,7 @@ const Compliance = () => {
 
           {/* ── Check rows ── */}
           <div className="space-y-4">
-          {SAFETY_CHECKS.map(check => {
+          {safetyChecks.map(check => {
             const { textColor, bgColor, Icon } = STATUS_CONFIG[check.status]
             return (
               <div
@@ -90,7 +116,7 @@ const Compliance = () => {
                 </div>
 
                 <button
-                  onClick={() => { setSelectedCheck(check); setActiveModal('log') }}
+                  onClick={() => { dispatch(setSelectedCheck(check)); dispatch(setActiveModal('log')) }}
                   className="px-5 py-2.5 text-xs font-semibold border border-borderGrey bg-background text-text hover:bg-cards transition-colors self-start md:self-center shrink-0"
                 >
                   Log Check
@@ -105,7 +131,7 @@ const Compliance = () => {
       {/* ── Generate Report Modal ── */}
       <MainModal
         isOpen={activeModal === 'report'}
-        onClose={() => setActiveModal(null)}
+        onClose={() => dispatch(closeModal())}
         title="Generate Compliance Report"
       >
         <div className="space-y-6">
@@ -117,10 +143,9 @@ const Compliance = () => {
                 Date Range
               </label>
               <select className="w-full p-3 border border-borderGrey bg-background text-text focus:outline-none focus:ring-1 focus:ring-corePurple">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-                <option>This Quarter</option>
-                <option>Custom Range...</option>
+                {dateRanges.map(range => (
+                  <option key={range.id} value={range.id}>{range.label}</option>
+                ))}
               </select>
             </div>
 
@@ -129,23 +154,22 @@ const Compliance = () => {
                 Report Type
               </label>
               <select className="w-full p-3 border border-borderGrey bg-background text-text focus:outline-none focus:ring-1 focus:ring-corePurple">
-                <option>Full HACCP Audit</option>
-                <option>Temperature Logs Only</option>
-                <option>Hygiene & Sanitation</option>
-                <option>Incident Summary</option>
+                {reportTypes.map(type => (
+                  <option key={type.id} value={type.id}>{type.label}</option>
+                ))}
               </select>
             </div>
           </div>
 
           <div className="flex justify-end gap-4 pt-6 border-t border-borderGrey">
             <button
-              onClick={() => setActiveModal(null)}
+              onClick={() => dispatch(closeModal())}
               className="px-6 py-2 border border-borderGrey text-sm font-medium text-text hover:bg-background transition-colors"
             >
               Cancel
             </button>
             <button
-              onClick={() => setActiveModal(null)}
+              onClick={() => dispatch(closeModal())}
               className="px-6 py-2 text-sm font-medium bg-corePurple text-white hover:opacity-90 transition-opacity"
             >
               Generate & Download
@@ -157,7 +181,7 @@ const Compliance = () => {
       {/* ── View All History Modal ── */}
       <MainModal
         isOpen={activeModal === 'history'}
-        onClose={() => setActiveModal(null)}
+        onClose={() => dispatch(closeModal())}
         title="Compliance History"
       >
         <div className="space-y-4">
@@ -173,14 +197,14 @@ const Compliance = () => {
           </div>
 
           <div className="space-y-2">
-            {[...SAFETY_CHECKS, ...SAFETY_CHECKS].map((check, i) => (
+            {[...safetyChecks, ...safetyChecks].map((check, i) => (
               <div
                 key={i}
                 className="flex items-center justify-between p-4 border border-borderGrey bg-background"
               >
                 <div>
                   <h4 className="font-medium text-sm text-text">{check.task}</h4>
-                  <p className="text-xs mt-1 text-darkGrey">{check.date} · Logged by System</p>
+                  <p className="text-xs mt-1 text-darkGrey">{check.date} · Logged by {check.checkedBy}</p>
                 </div>
                 <span className={`px-2 py-1 text-xs font-mono uppercase tracking-wider ${STATUS_CONFIG[check.status].bgColor} ${STATUS_CONFIG[check.status].textColor}`}>
                   {check.status}
@@ -194,7 +218,7 @@ const Compliance = () => {
       {/* ── Log Check Modal ── */}
       <MainModal
         isOpen={activeModal === 'log'}
-        onClose={() => { setActiveModal(null); setSelectedCheck(null) }}
+        onClose={() => { dispatch(closeModal()); dispatch(setSelectedCheck(null)) }}
         title={`Log Check: ${selectedCheck?.task ?? 'New Entry'}`}
       >
         <div className="space-y-6">
@@ -246,13 +270,13 @@ const Compliance = () => {
 
           <div className="flex justify-end gap-4 pt-6 border-t border-borderGrey">
             <button
-              onClick={() => { setActiveModal(null); setSelectedCheck(null) }}
+              onClick={() => { dispatch(closeModal()); dispatch(setSelectedCheck(null)) }}
               className="px-6 py-2 border border-borderGrey text-sm font-medium text-text hover:bg-background transition-colors"
             >
               Cancel
             </button>
             <button
-              onClick={() => { setActiveModal(null); setSelectedCheck(null) }}
+              onClick={() => { dispatch(closeModal()); dispatch(setSelectedCheck(null)) }}
               className="px-6 py-2 text-sm font-medium bg-corePurple text-white hover:opacity-90 transition-opacity"
             >
               Submit Log

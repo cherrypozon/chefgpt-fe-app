@@ -1,0 +1,68 @@
+{
+  "events": [
+    {
+      "id": "evt-001",
+      "date": "TODAY",
+      "dateFormatted": "2026-03-17",
+      "title": "Ben&Ben Live at SM MOA",
+      "location": "SM Mall of Asia",
+      "sub": "~5,000 crowd · High foot traffic",
+      "expectedCrowd": 5000,
+      "impact": "high"
+    },
+    {
+      "id": "evt-002",
+      "date": "MAR 19",
+      "dateFormatted": "2026-03-19",
+      "title": "Korean Cultural Fair",
+      "location": "Cultural Center",
+      "sub": "Cultural Center · K-cuisine demand ↑",
+      "expectedCrowd": 3000,
+      "impact": "medium"
+    },
+    {
+      "id": "evt-003",
+      "date": "MAR 21",
+      "dateFormatted": "2026-03-21",
+      "title": "Weekend Food Market",
+      "location": "Bonifacio Global City",
+      "sub": "Competition from street vendors",
+      "expectedCrowd": 8000,
+      "impact": "low"
+    }
+  ],
+
+  "dishFeedback": [
+    { "id": "dish-001", "name": "Kare-Kare", "rating": 5,   "reviews": 24, "trend": "stable" },
+    { "id": "dish-002", "name": "Lumpia",    "rating": 3.5, "reviews": 31, "trend": "down" },
+    { "id": "dish-006", "name": "Callos",    "rating": 1.5, "reviews": 8,  "trend": "down" }
+  ],
+
+  "guestMix": [
+    { "label": "Filipino", "pct": 32, "color": "bg-corePurple" },
+    { "label": "Chinese",  "pct": 24, "color": "bg-sky-500" },
+    { "label": "Korean",   "pct": 19, "color": "bg-amber-500" },
+    { "label": "American", "pct": 15, "color": "bg-emerald-500" },
+    { "label": "Other",    "pct": 10, "color": "bg-pink-500" }
+  ],
+
+  "contextSources": [
+    { "id": "src-001", "name": "Events API",        "type": "events",      "isActive": true,  "lastSync": "2026-03-17T08:00:00Z" },
+    { "id": "src-002", "name": "Feedback System",   "type": "feedback",    "isActive": true,  "lastSync": "2026-03-17T08:30:00Z" },
+    { "id": "src-003", "name": "Demographics DB",   "type": "demographics","isActive": true,  "lastSync": "2026-03-17T09:00:00Z" },
+    { "id": "src-004", "name": "Inventory System",  "type": "inventory",   "isActive": true,  "lastSync": "2026-03-17T07:00:00Z" },
+    { "id": "src-005", "name": "POS System",        "type": "sales",       "isActive": true,  "lastSync": "2026-03-17T09:15:00Z" },
+    { "id": "src-006", "name": "Weather API",       "type": "weather",     "isActive": false, "lastSync": "2026-03-16T23:00:00Z" }
+  ],
+
+  "alerts": [
+    {
+      "id": "alert-001",
+      "type": "ACTION_REQUIRED",
+      "message": "Upcoming HACCP Inspection in 48 hours. Review safety logs.",
+      "priority": "high",
+      "dismissible": true,
+      "createdAt": "2026-03-17T06:00:00Z"
+    }
+  ]
+}

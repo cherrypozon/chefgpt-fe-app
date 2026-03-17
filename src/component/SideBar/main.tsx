@@ -1,34 +1,53 @@
 'use client'
 
-import React, { useState, useRef, useEffect } from 'react'
-import { ChevronDown, ChevronRight, User } from 'lucide-react'
-import type { SidebarProps } from '../../type/model'
-import { NAV_ITEMS, CHAT_HISTORY } from '../../helper/constant'
+import React, { useRef, useEffect } from 'react'
+import { ChevronDown, ChevronRight, User, MessageSquare, LayoutDashboard, FileText, ShieldCheck } from 'lucide-react'
 import ProfileModal from '../Modal/ProfileModal'
-
-export const Sidebar: React.FC<SidebarProps> = ({
-  activeTab,
+import {
+  useAppDispatch,
+  useAppSelector,
   setActiveTab,
-  activeChatId,
   setActiveChatId,
-  sidebarOpen,
   setSidebarOpen,
-  onLogout,
-}) => {
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [historyVisible, setHistoryVisible] = useState(true);
-  const profileRef = useRef<HTMLDivElement>(null);
+  setProfileOpen,
+  toggleHistoryVisible,
+} from '../../redux'
+import type { RootState } from '../../redux/store'
+
+// Nav items config (static, kept here since it's UI config not data)
+const NAV_ITEMS = [
+  { id: 'conversation', label: 'Conversation',   icon: MessageSquare,   badge: null },
+  { id: 'dashboard',    label: 'Dashboard',      icon: LayoutDashboard, badge: null },
+  { id: 'knowledge',    label: 'Knowledge Base', icon: FileText,        badge: null },
+  { id: 'safety',       label: 'Compliance',     icon: ShieldCheck,     badge: null },
+]
+
+interface SidebarProps {
+  onLogout: () => void
+}
+
+export const Sidebar: React.FC<SidebarProps> = ({ onLogout }) => {
+  const dispatch = useAppDispatch()
+  const activeTab = useAppSelector((state: RootState) => state.ui.activeTab)
+  const activeChatId = useAppSelector((state: RootState) => state.chat.activeChatId)
+  const sidebarOpen = useAppSelector((state: RootState) => state.ui.sidebarOpen)
+  const profileOpen = useAppSelector((state: RootState) => state.ui.profileOpen)
+  const historyVisible = useAppSelector((state: RootState) => state.ui.historyVisible)
+  const chatHistory = useAppSelector((state: RootState) => state.chat.chatHistory)
+  const knowledgeDocs = useAppSelector((state: RootState) => state.knowledge.documents)
+  
+  const profileRef = useRef<HTMLDivElement>(null)
 
   /* Close popup when clicking outside */
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-        setProfileOpen(false)
+        dispatch(setProfileOpen(false))
       }
     }
     document.addEventListener('mousedown', handler)
     return () => document.removeEventListener('mousedown', handler)
-  }, [])
+  }, [dispatch])
 
   return (
     <>
@@ -36,7 +55,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/80 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => dispatch(setSidebarOpen(false))}
         />
       )}
 
@@ -77,12 +96,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Nav items */}
         <nav className="pb-2">
-          {NAV_ITEMS.map(({ id, label, icon: Icon, badge }) => {
+          {NAV_ITEMS.map(({ id, label, icon: Icon }) => {
             const active = activeTab === id
+            const badge = id === 'knowledge' && knowledgeDocs.length > 0 ? String(knowledgeDocs.length) : null
             return (
               <button
                 key={id}
-                onClick={() => { setActiveTab(id); setSidebarOpen(false) }}
+                onClick={() => { 
+                  dispatch(setActiveTab(id as 'conversation' | 'dashboard' | 'knowledge' | 'safety'))
+                  dispatch(setSidebarOpen(false))
+                }}
                 className={[
                   'w-full flex items-center justify-between px-6 py-2.5',
                   'text-left border-l-[3px] transition-all duration-150',
@@ -109,7 +132,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* Chat History */}
         <button
-          onClick={() => setHistoryVisible(prev => !prev)}
+          onClick={() => dispatch(toggleHistoryVisible())}
           className="w-full flex items-center justify-between px-6 pt-5 pb-1 mt-2 group mb-3"
         >
           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-darkGrey">
@@ -130,7 +153,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             historyVisible ? 'flex-1 opacity-100' : 'max-h-0 opacity-0 overflow-hidden',
           ].join(' ')}
         >
-          {CHAT_HISTORY.map(({ period, items }) => (
+          {chatHistory.map(({ period, items }) => (
             <div key={period} className="mb-5">
               <p className="text-[10px] font-semibold px-2 py-1.5 text-darkGrey">
                 {period}
@@ -141,9 +164,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   <button
                     key={id}
                     onClick={() => {
-                      setActiveChatId(id)
-                      setActiveTab('conversation')
-                      setSidebarOpen(false)
+                      dispatch(setActiveChatId(id))
+                      dispatch(setActiveTab('conversation'))
+                      dispatch(setSidebarOpen(false))
                     }}
                     className={[
                       'w-full flex items-center justify-between gap-1',
@@ -174,7 +197,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             )}
 
             <button
-              onClick={() => setProfileOpen(prev => !prev)}
+              onClick={() => dispatch(setProfileOpen(!profileOpen))}
               className="w-full flex items-center gap-2.5 py-2 px-1 hover:opacity-80 transition-opacity duration-150"
             >
               <div className={[

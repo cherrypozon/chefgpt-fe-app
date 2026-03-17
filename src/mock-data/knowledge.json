@@ -1,0 +1,90 @@
+{
+  "documents": [
+    {
+      "id": "doc-001",
+      "name": "Cuisine Techniques Q1.pdf",
+      "fileUrl": "/uploads/cuisine_q1.pdf",
+      "size": "2.4 MB",
+      "fileType": "pdf",
+      "uploadDate": "2026-03-01T10:00:00Z",
+      "uploadedBy": "usr-001",
+      "tags": ["Recipes", "Training"],
+      "isIndexed": true,
+      "chunkCount": 45,
+      "status": "ready"
+    },
+    {
+      "id": "doc-002",
+      "name": "Cuisine Techniques Q2.pdf",
+      "fileUrl": "/uploads/cuisine_q2.pdf",
+      "size": "2.1 MB",
+      "fileType": "pdf",
+      "uploadDate": "2026-03-03T14:30:00Z",
+      "uploadedBy": "usr-001",
+      "tags": ["Recipes", "Training"],
+      "isIndexed": true,
+      "chunkCount": 38,
+      "status": "ready"
+    },
+    {
+      "id": "doc-003",
+      "name": "HACCP Guidelines 2026.pdf",
+      "fileUrl": "/uploads/haccp_2026.pdf",
+      "size": "1.8 MB",
+      "fileType": "pdf",
+      "uploadDate": "2026-03-05T09:15:00Z",
+      "uploadedBy": "usr-001",
+      "tags": ["Compliance", "Safety"],
+      "isIndexed": true,
+      "chunkCount": 62,
+      "status": "ready"
+    },
+    {
+      "id": "doc-004",
+      "name": "Supplier Contact List.xlsx",
+      "fileUrl": "/uploads/suppliers.xlsx",
+      "size": "450 KB",
+      "fileType": "xlsx",
+      "uploadDate": "2026-03-08T11:00:00Z",
+      "uploadedBy": "usr-002",
+      "tags": ["Suppliers", "Operations"],
+      "isIndexed": true,
+      "chunkCount": 12,
+      "status": "ready"
+    },
+    {
+      "id": "doc-005",
+      "name": "Allergen Matrix.csv",
+      "fileUrl": "/uploads/allergens.csv",
+      "size": "125 KB",
+      "fileType": "csv",
+      "uploadDate": "2026-03-10T08:45:00Z",
+      "uploadedBy": "usr-001",
+      "tags": ["Safety", "Menu"],
+      "isIndexed": true,
+      "chunkCount": 8,
+      "status": "ready"
+    }
+  ],
+
+  "tags": [
+    { "id": "tag-001", "name": "Recipes" },
+    { "id": "tag-002", "name": "Training" },
+    { "id": "tag-003", "name": "Compliance" },
+    { "id": "tag-004", "name": "Safety" },
+    { "id": "tag-005", "name": "Suppliers" },
+    { "id": "tag-006", "name": "Operations" },
+    { "id": "tag-007", "name": "Menu" },
+    { "id": "tag-008", "name": "New" },
+    { "id": "tag-009", "name": "Uncategorized" }
+  ],
+
+  "processingStatuses": {
+    "uploading": "File is being uploaded",
+    "chunking": "Splitting document into chunks",
+    "embedding": "Generating vector embeddings",
+    "indexing": "Adding to search index",
+    "ready": "Document is ready for RAG",
+    "failed": "Processing failed"
+  }
+}

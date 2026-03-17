@@ -1,0 +1,90 @@
+{
+  "stats": [
+    {
+      "label": "TODAY'S COVERS",
+      "value": "340",
+      "sub": "↑ 18% vs last week",
+      "trend": "up",
+      "color": "text-emerald-400"
+    },
+    {
+      "label": "AVG WASTE RATE",
+      "value": "34%",
+      "sub": "↑ 4% — action needed",
+      "trend": "up",
+      "color": "text-pink-400"
+    },
+    {
+      "label": "EST. WASTE COST",
+      "value": "₱59k",
+      "sub": "This week",
+      "trend": "neutral",
+      "color": "text-amber-400"
+    },
+    {
+      "label": "GUEST SATISFACTION",
+      "value": "4.1/5",
+      "sub": "↑ 0.3 vs last month",
+      "trend": "up",
+      "color": "text-emerald-400"
+    }
+  ],
+
+  "wasteData": [
+    { "name": "Callos",    "value": 83, "fill": "#D97706", "status": "critical" },
+    { "name": "Papaitan",  "value": 81, "fill": "#D97706", "status": "critical" },
+    { "name": "Squash",    "value": 52, "fill": "#F59E0B", "status": "warning" },
+    { "name": "Pizza",     "value": 38, "fill": "#10B981", "status": "normal" },
+    { "name": "Menudo",    "value": 29, "fill": "#10B981", "status": "normal" },
+    { "name": "Kare-Kare", "value": 24, "fill": "#059669", "status": "good" },
+    { "name": "Lumpia",    "value": 19, "fill": "#059669", "status": "good" }
+  ],
+
+  "demographics": {
+    "totalCovers": 340,
+    "data": [
+      { "name": "Filipino", "value": 42, "color": "#A100FF", "count": 143 },
+      { "name": "Korean",   "value": 28, "color": "#D97706", "count": 95 },
+      { "name": "American", "value": 18, "color": "#65A30D", "count": 61 },
+      { "name": "Others",   "value": 12, "color": "#4B5563", "count": 41 }
+    ]
+  },
+
+  "coversData": [
+    { "day": 1, "date": "2026-03-11", "actual": 200, "forecast": 210 },
+    { "day": 2, "date": "2026-03-12", "actual": 220, "forecast": 215 },
+    { "day": 3, "date": "2026-03-13", "actual": 250, "forecast": 240 },
+    { "day": 4, "date": "2026-03-14", "actual": 280, "forecast": 270 },
+    { "day": 5, "date": "2026-03-15", "actual": 310, "forecast": 300 },
+    { "day": 6, "date": "2026-03-16", "actual": 340, "forecast": 320 },
+    { "day": 7, "date": "2026-03-17", "actual": 350, "forecast": 340 }
+  ],
+
+  "wasteTrend": [
+    { "week": 1, "startDate": "2026-02-03", "rate": 28 },
+    { "week": 2, "startDate": "2026-02-10", "rate": 29 },
+    { "week": 3, "startDate": "2026-02-17", "rate": 27 },
+    { "week": 4, "startDate": "2026-02-24", "rate": 26 },
+    { "week": 5, "startDate": "2026-03-03", "rate": 30 },
+    { "week": 6, "startDate": "2026-03-10", "rate": 34 }
+  ],
+
+  "topDishes": [
+    { "id": "dish-001", "name": "Kare-Kare", "rating": 4.8, "reviewCount": 124, "color": "#10B981" },
+    { "id": "dish-002", "name": "Lumpia",    "rating": 4.5, "reviewCount": 98,  "color": "#10B981" },
+    { "id": "dish-003", "name": "Menudo",    "rating": 4.1, "reviewCount": 76,  "color": "#D97706" },
+    { "id": "dish-004", "name": "Squash",    "rating": 3.2, "reviewCount": 45,  "color": "#D97706" },
+    { "id": "dish-005", "name": "Papaitan",  "rating": 2.8, "reviewCount": 32,  "color": "#EF4444" },
+    { "id": "dish-006", "name": "Callos",    "rating": 2.3, "reviewCount": 28,  "color": "#EF4444" }
+  ],
+
+  "dishes": [
+    { "id": "dish-001", "name": "Kare-Kare", "category": "Main Course", "price": 450, "isActive": true },
+    { "id": "dish-002", "name": "Lumpia",    "category": "Appetizer",   "price": 180, "isActive": true },
+    { "id": "dish-003", "name": "Menudo",    "category": "Main Course", "price": 320, "isActive": true },
+    { "id": "dish-004", "name": "Squash",    "category": "Side Dish",   "price": 150, "isActive": true },
+    { "id": "dish-005", "name": "Papaitan",  "category": "Main Course", "price": 380, "isActive": true },
+    { "id": "dish-006", "name": "Callos",    "category": "Main Course", "price": 420, "isActive": true },
+    { "id": "dish-007", "name": "Pizza",     "category": "Main Course", "price": 350, "isActive": true }
+  ]
+}

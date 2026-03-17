@@ -1,45 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect } from 'react'
 import { Upload, FileText, Trash2 } from 'lucide-react'
 import MainModal from '../Modal/MainModal'
 import Header from '../Header/main'
-import type { KnowledgeDoc } from '../../type/model'
-import { INITIAL_DOCS } from '../../helper/constant'
+import {
+  useAppDispatch,
+  useAppSelector,
+  setSelectedDocument,
+  setSearchQuery,
+  setIsDragging,
+  knowledgeThunks,
+} from '../../redux'
+import type { RootState } from '../../redux/store'
 
 
 const Knowledge = () => {
-  const [docs,        setDocs]        = useState<KnowledgeDoc[]>(INITIAL_DOCS)
-  const [isDragging,  setIsDragging]  = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [selectedDoc, setSelectedDoc] = useState<KnowledgeDoc | null>(null)
-  const [search,      setSearch]      = useState('')
+  const dispatch = useAppDispatch()
+  
+  const docs = useAppSelector((state: RootState) => state.knowledge.documents)
+  const selectedDoc = useAppSelector((state: RootState) => state.knowledge.selectedDocument)
+  const search = useAppSelector((state: RootState) => state.knowledge.searchQuery)
+  const isUploading = useAppSelector((state: RootState) => state.knowledge.isUploading)
+  const isDragging = useAppSelector((state: RootState) => state.ui.isDragging)
+  // Filtered documents computed inline
+  const filtered = docs.filter(doc => 
+    doc.name.toLowerCase().includes(search.toLowerCase()) ||
+    doc.tags?.some(tag => tag.toLowerCase().includes(search.toLowerCase()))
+  )
+
+  useEffect(() => {
+    dispatch(knowledgeThunks.fetchDocuments())
+  }, [dispatch])
 
   const simulateUpload = () => {
-    setIsUploading(true)
-    setTimeout(() => {
-      setIsUploading(false)
-      setDocs(prev => [{
-        id:   Date.now(),
-        name: 'New Uploaded Document.pdf',
-        size: '1.2 MB',
-        date: 'Just now',
-        tags: ['New', 'Uncategorized'],
-      }, ...prev])
-    }, 2000)
+    // Create a mock file for demo purposes
+    const mockFile = new File([''], 'New Uploaded Document.pdf', { type: 'application/pdf' })
+    dispatch(knowledgeThunks.uploadDocument(mockFile))
   }
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
-    setIsDragging(false)
+    dispatch(setIsDragging(false))
     simulateUpload()
   }
 
-  const removeDoc = (id: number) => setDocs(prev => prev.filter(d => d.id !== id))
-
-  const filtered = docs.filter(d =>
-    d.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const removeDoc = (id: string) => dispatch(knowledgeThunks.deleteDocument(id))
 
   return (
     <div className="flex flex-col h-full w-full bg-background">
@@ -60,7 +66,7 @@ const Knowledge = () => {
           <input
             type="text"
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={e => dispatch(setSearchQuery(e.target.value))}
             placeholder="Search recipes, playbooks, data sources..."
             className="w-full md:w-80 p-2.5 border border-borderGrey rounded-xl bg-cards text-sm text-text placeholder:text-darkGrey placeholder:text-xs focus:outline-none transition-all"
           />
@@ -76,8 +82,8 @@ const Knowledge = () => {
               ? 'border-corePurple bg-corePurple/10'
               : 'border-borderGrey bg-cards',
           ].join(' ')}
-          onDragOver={e => { e.preventDefault(); setIsDragging(true) }}
-          onDragLeave={() => setIsDragging(false)}
+          onDragOver={e => { e.preventDefault(); dispatch(setIsDragging(true)) }}
+          onDragLeave={() => dispatch(setIsDragging(false))}
           onDrop={handleDrop}
         >
           {isUploading ? (
@@ -134,7 +140,7 @@ const Knowledge = () => {
                 {/* Hover actions */}
                 <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                   <button
-                    onClick={() => setSelectedDoc(doc)}
+                    onClick={() => dispatch(setSelectedDocument(doc))}
                     className="px-2 py-1 text-[10px] font-medium text-text hover:bg-background transition-colors"
                   >
                     View
@@ -178,7 +184,7 @@ const Knowledge = () => {
       {/* ── Document viewer modal ── */}
       <MainModal
         isOpen={!!selectedDoc}
-        onClose={() => setSelectedDoc(null)}
+        onClose={() => dispatch(setSelectedDocument(null))}
         title={selectedDoc?.name ?? 'Document Viewer'}
       >
         {selectedDoc && (
@@ -223,7 +229,7 @@ const Knowledge = () => {
 
             <div className="flex justify-end gap-4 pt-6 border-t border-borderGrey">
               <button
-                onClick={() => setSelectedDoc(null)}
+                onClick={() => dispatch(setSelectedDocument(null))}
                 className="px-6 py-2 border border-borderGrey text-sm font-medium text-text hover:bg-background transition-colors"
               >
                 Close

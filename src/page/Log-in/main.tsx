@@ -1,36 +1,51 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Eye, EyeOff } from 'lucide-react';
 import PageLoader from '../PageLoader/main'
-
-// Mock credentials - replace with actual auth logic
-const VALID_CREDENTIALS = {
-  email: 'chef@restaurant.com',
-  password: 'password123'
-}
+import {
+  useAppDispatch,
+  useAppSelector,
+  authThunks,
+  clearAuthError,
+} from '../../redux'
+import type { RootState } from '../../redux'
 
 const Login = () => {
   const navigate = useNavigate()
+  const dispatch = useAppDispatch()
+  
+  const isAuthenticated = useAppSelector((state: RootState) => state.auth.isAuthenticated)
+  const loading = useAppSelector((state: RootState) => state.auth.isLoading)
+  const authError = useAppSelector((state: RootState) => state.auth.error)
+  
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [showLoader, setShowLoader] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    setError('')
-
-    if (email === VALID_CREDENTIALS.email && password === VALID_CREDENTIALS.password) {
-      setShowLoader(true)
-    } else {
-      setError('Invalid email or password')
+  // Clear auth error when component mounts or inputs change
+  useEffect(() => {
+    if (authError) {
+      dispatch(clearAuthError())
     }
+  }, [email, password])
+
+  // Navigate when authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      setShowLoader(true)
+    }
+  }, [isAuthenticated])
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    dispatch(authThunks.login({ email, password }))
   }
 
   const handleRequestDemo = () => {
+    // Demo mode - skip auth
     setShowLoader(true)
   }
 
@@ -128,9 +143,9 @@ const Login = () => {
             Sign in to access your kitchen intelligence.
           </p>
 
-          {error && (
+          {authError && (
             <div className="p-3 mb-5 bg-red-500/10 border border-red-500/50 text-red-400 text-sm rounded-sm">
-              {error}
+              {authError}
             </div>
           )}
 
@@ -168,10 +183,11 @@ const Login = () => {
 
             <button
               onClick={handleSubmit}
-              className="w-full py-3 font-semibold text-base text-white transition-opacity duration-150 hover:opacity-90 mt-2"
+              disabled={loading}
+              className="w-full py-3 font-semibold text-base text-white transition-opacity duration-150 hover:opacity-90 mt-2 disabled:opacity-50"
               style={{ backgroundColor: '#A100FF' }}
             >
-              Sign In
+              {loading ? 'Signing In...' : 'Sign In'}
             </button>
 
             <p className="text-center text-sm text-darkgrey pt-1">

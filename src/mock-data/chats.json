@@ -1,0 +1,105 @@
+{
+  "models": [
+    { "id": "orchestrator", "label": "ChefGPT Orchestrator", "desc": "Full agent pipeline" },
+    { "id": "specialist",   "label": "Specialist Agent",     "desc": "Single domain focus" },
+    { "id": "fast",         "label": "ChefGPT Fast",         "desc": "Quick responses" }
+  ],
+
+  "chatHistory": [
+    {
+      "period": "Today",
+      "items": [
+        { "id": "chat-1", "label": "Optimize tonight's menu", "createdAt": "2026-03-17T09:00:00Z" }
+      ]
+    },
+    {
+      "period": "Previous 7 Days",
+      "items": [
+        { "id": "chat-2", "label": "Generate PO for weekend",   "createdAt": "2026-03-15T14:00:00Z" },
+        { "id": "chat-3", "label": "Analyze Papaitan waste",    "createdAt": "2026-03-14T10:30:00Z" },
+        { "id": "chat-4", "label": "Staff scheduling conflict", "createdAt": "2026-03-12T16:00:00Z" }
+      ]
+    },
+    {
+      "period": "Previous 30 Days",
+      "items": [
+        { "id": "chat-5", "label": "New vegan dessert ideas",     "createdAt": "2026-02-28T11:00:00Z" },
+        { "id": "chat-6", "label": "Supplier negotiation points", "createdAt": "2026-02-20T09:00:00Z" }
+      ]
+    }
+  ],
+
+  "messages": {
+    "chat-1": [
+      {
+        "id": 1,
+        "sender": "ai",
+        "text": "Good morning, Chef! I've loaded your context for today. Here's your briefing:\n\n📅 Tonight's forecast: 340 F&B covers expected (↑18% vs last week)\n🎵 Nearby event: Music festival at SM Mall of Asia (~5,000 attendees)\n🌍 Guest mix today: 42% Filipino, 28% Korean, 18% American\n⚠️ High-waste alert: Callos (83%) and Papaitan (81%) flagged\n\nWhat would you like to focus on today?",
+        "isArtifact": false,
+        "agentType": "ORCHESTRATOR",
+        "timestamp": "2026-03-17T09:00:00Z",
+        "contextSources": ["doc-001", "doc-002", "doc-005"]
+      }
+    ],
+    "chat-2": [
+      {
+        "id": 1,
+        "sender": "ai",
+        "text": "I'll help you generate a purchase order for the weekend. Let me pull the current inventory levels and projected demand.",
+        "isArtifact": false,
+        "agentType": "ORCHESTRATOR",
+        "timestamp": "2026-03-15T14:00:00Z",
+        "contextSources": ["doc-004"]
+      }
+    ],
+    "chat-3": [
+      {
+        "id": 1,
+        "sender": "ai",
+        "text": "Let's analyze the Papaitan waste patterns. Based on the last 7 days, Papaitan has an 81% waste rate. Here are the key contributing factors.",
+        "isArtifact": false,
+        "agentType": "ORCHESTRATOR",
+        "timestamp": "2026-03-14T10:30:00Z",
+        "contextSources": ["doc-001"]
+      }
+    ],
+    "chat-4": [
+      {
+        "id": 1,
+        "sender": "ai",
+        "text": "I see there's a staff scheduling conflict. Let me review the roster and suggest adjustments.",
+        "isArtifact": false,
+        "agentType": "ORCHESTRATOR",
+        "timestamp": "2026-03-12T16:00:00Z",
+        "contextSources": []
+      }
+    ]
+  },
+
+  "shortcuts": [
+    { "id": "sc-001", "icon": "FileText",      "text": "Optimize tonight's menu" },
+    { "id": "sc-002", "icon": "AlertTriangle", "text": "Fix high-waste dishes", "iconClassName": "text-green-500" },
+    { "id": "sc-003", "icon": "FileText",      "text": "Generate PO" },
+    { "id": "sc-004", "icon": "FileText",      "text": "Event-based suggestions" }
+  ],
+
+  "agentResponses": {
+    "optimize_menu": {
+      "text": "Based on the data, here is a detailed breakdown of the waste patterns and how we can optimize the menu for tonight.\n\nFirst, we notice that Papaitan has an 81% waste rate, which is significantly higher than the average. This could be due to portion sizes or guest preferences.\n\nSecond, Callos is also flagged at 83% waste. We should consider reducing the batch size for these dishes.\n\nFinally, with the music festival nearby, we can expect a younger demographic who might prefer quick bites over heavy meals. Let's adjust the prep accordingly.",
+      "isArtifact": true,
+      "artifactTitle": "Menu Optimization Plan",
+      "agentType": "SPECIALIST"
+    },
+    "generate_po": {
+      "text": "Here is the generated Purchase Order based on current inventory levels and projected demand for the weekend.\n\n1. 50kg Chicken Breast (Supplier A)\n2. 20kg Beef Brisket (Supplier B)\n3. 15kg Assorted Vegetables (Supplier C)\n\nPlease review the quantities before I send this to the suppliers.",
+      "isArtifact": true,
+      "artifactTitle": "Purchase Order #4029",
+      "agentType": "SPECIALIST"
+    },
+    "default": {
+      "text": "I've noted your request. Is there anything else you'd like me to look into?",
+      "isArtifact": false,
+      "agentType": "ORCHESTRATOR"
+    }
+  }
+}

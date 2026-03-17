@@ -115,10 +115,13 @@ export interface KnowledgeDoc {
 
 export interface SafetyCheck {
   id: number
+  taskId: string
   task: string
   desc: string
   date: string
   status: 'pass' | 'warning' | 'fail'
+  checkedBy: string
+  check?: string
 }
 
 export interface ComplianceStatItem {

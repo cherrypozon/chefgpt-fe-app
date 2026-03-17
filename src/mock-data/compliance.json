@@ -1,0 +1,39 @@
+{
+  "stats": [
+    { "label": "PASSING",  "value": "24", "status": "pass",    "textColor": "text-emerald-400", "bgColor": "bg-emerald-500/10", "borderColor": "border-emerald-500" },
+    { "label": "WARNINGS", "value": "3",  "status": "warning", "textColor": "text-amber-400",   "bgColor": "bg-amber-500/10",   "borderColor": "border-amber-500" },
+    { "label": "FAILED",   "value": "1",  "status": "fail",    "textColor": "text-red-400",     "bgColor": "bg-red-500/10",     "borderColor": "border-red-500" }
+  ],
+
+  "safetyTasks": [
+    { "id": "task-001", "name": "Cold Storage Temperature",    "description": "All refrigeration units must be between 1°C and 4°C.",         "frequency": "daily" },
+    { "id": "task-002", "name": "Hot Holding Temperature",     "description": "Hot food must be held at 60°C or above before service.",       "frequency": "daily" },
+    { "id": "task-003", "name": "Hand Hygiene Station Check",  "description": "All stations must be stocked with soap and sanitizer.",        "frequency": "daily" },
+    { "id": "task-004", "name": "Pest Control Inspection",     "description": "Monthly inspection by licensed pest control provider.",        "frequency": "monthly" },
+    { "id": "task-005", "name": "Cross-Contamination Protocol","description": "Allergen separation procedures must be followed at all times.","frequency": "daily" },
+    { "id": "task-006", "name": "Supplier Delivery Inspection","description": "Incoming goods must be checked for temperature and labelling.","frequency": "daily" }
+  ],
+
+  "safetyChecks": [
+    { "id": 1, "taskId": "task-001", "task": "Cold Storage Temperature",     "desc": "All refrigeration units must be between 1°C and 4°C.",          "date": "Today 06:00",   "status": "pass",    "checkedBy": "usr-001" },
+    { "id": 2, "taskId": "task-002", "task": "Hot Holding Temperature",      "desc": "Hot food must be held at 60°C or above before service.",        "date": "Today 08:30",   "status": "pass",    "checkedBy": "usr-001" },
+    { "id": 3, "taskId": "task-003", "task": "Hand Hygiene Station Check",   "desc": "All stations must be stocked with soap and sanitizer.",         "date": "Today 07:00",   "status": "warning", "checkedBy": "usr-002" },
+    { "id": 4, "taskId": "task-004", "task": "Pest Control Inspection",      "desc": "Monthly inspection by licensed pest control provider.",         "date": "Mar 01 2026",   "status": "pass",    "checkedBy": "usr-001" },
+    { "id": 5, "taskId": "task-005", "task": "Cross-Contamination Protocol", "desc": "Allergen separation procedures must be followed at all times.", "date": "Today 09:00",   "status": "fail",    "checkedBy": "usr-002" },
+    { "id": 6, "taskId": "task-006", "task": "Supplier Delivery Inspection", "desc": "Incoming goods must be checked for temperature and labelling.", "date": "Today 07:45",   "status": "warning", "checkedBy": "usr-001" }
+  ],
+
+  "reportTypes": [
+    { "id": "full_haccp",    "label": "Full HACCP Audit" },
+    { "id": "temp_logs",     "label": "Temperature Logs Only" },
+    { "id": "hygiene",       "label": "Hygiene & Sanitation" },
+    { "id": "incident",      "label": "Incident Summary" }
+  ],
+
+  "dateRanges": [
+    { "id": "7d",      "label": "Last 7 Days" },
+    { "id": "30d",     "label": "Last 30 Days" },
+    { "id": "quarter", "label": "This Quarter" },
+    { "id": "custom",  "label": "Custom Range..." }
+  ]
+}

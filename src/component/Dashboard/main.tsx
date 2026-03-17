@@ -1,16 +1,32 @@
 'use client'
 
+import { useEffect } from 'react'
 import {
   FoodWasteChart, GuestNationalityChart, DailyCoversChart,
   WasteTrendChart, TopRatedDishesChart
 } from '../Graph'
-import {
-  STATS, WASTE_DATA, DEMOGRAPHICS,
-  COVERS_DATA, WASTE_TREND, TOP_DISHES
-} from '../../helper/constant'
 import Header from '../Header/main'
+import {
+  useAppDispatch,
+  useAppSelector,
+  dashboardThunks,
+} from '../../redux'
+import type { RootState } from '../../redux'
 
 const Dashboard = () => {
+  const dispatch = useAppDispatch()
+  const stats = useAppSelector((state: RootState) => state.dashboard.stats)
+  const wasteData = useAppSelector((state: RootState) => state.dashboard.wasteData)
+  const demographics = useAppSelector((state: RootState) => state.dashboard.demographics)
+  const coversData = useAppSelector((state: RootState) => state.dashboard.coversData)
+  const wasteTrend = useAppSelector((state: RootState) => state.dashboard.wasteTrend)
+  const topDishes = useAppSelector((state: RootState) => state.dashboard.topDishes)
+
+  // Fetch all dashboard data on mount
+  useEffect(() => {
+    dispatch(dashboardThunks.fetchAllData())
+  }, [dispatch])
+
   return (
     <div className="flex flex-col h-full w-full bg-background">
 
@@ -30,7 +46,7 @@ const Dashboard = () => {
 
           {/* ── Stat cards ── */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {STATS.map((stat, i) => (
+            {stats.map((stat, i) => (
               <div key={i} className="p-5 border border-borderGrey bg-cards relative overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-corePurple/10 hover:-translate-y-1 cursor-pointer">
                 <p className="text-[10px] font-semibold uppercase tracking-widest mb-3 text-darkGrey">
                   {stat.label}
@@ -45,15 +61,15 @@ const Dashboard = () => {
 
           {/* ── Charts row ── */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <FoodWasteChart data={WASTE_DATA} />
-            <GuestNationalityChart data={DEMOGRAPHICS} totalCovers={340} />
+            <FoodWasteChart data={wasteData} />
+            <GuestNationalityChart data={demographics?.data || []} totalCovers={demographics?.totalCovers || 0} />
           </div>
 
           {/* ── Bottom row ── */}
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <DailyCoversChart data={COVERS_DATA} />
-            <WasteTrendChart data={WASTE_TREND} />
-            <TopRatedDishesChart data={TOP_DISHES} />
+            <DailyCoversChart data={coversData} />
+            <WasteTrendChart data={wasteTrend} />
+            <TopRatedDishesChart data={topDishes} />
           </div>
         </div>
       </div>
