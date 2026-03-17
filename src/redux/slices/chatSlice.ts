@@ -9,6 +9,7 @@ const initialState: ChatState = {
   models: [],
   shortcuts: [],
   selectedModel: null,
+  pendingArtifact: null,
   isTyping: false,
   isLoading: false,
   error: null,
@@ -32,6 +33,9 @@ const chatSlice = createSlice({
     },
     clearMessages: (state) => {
       state.messages = []
+    },
+    clearPendingArtifact: (state) => {
+      state.pendingArtifact = null
     },
     clearError: (state) => {
       state.error = null
@@ -75,6 +79,14 @@ const chatSlice = createSlice({
         state.isTyping = false
         state.messages.push(action.payload.data.userMessage)
         state.messages.push(action.payload.data.aiMessage)
+        // Store pending artifact to auto-show in UI
+        if (action.payload.data.aiMessage.isArtifact) {
+          state.pendingArtifact = {
+            id: action.payload.data.aiMessage.id,
+            text: action.payload.data.aiMessage.text,
+            title: action.payload.data.aiMessage.artifactTitle ?? '',
+          }
+        }
       })
       .addCase(chatThunks.sendMessage.rejected, (state, action) => {
         state.isTyping = false
@@ -104,6 +116,7 @@ export const {
   setIsTyping, 
   addMessage, 
   clearMessages,
+  clearPendingArtifact,
   clearError 
 } = chatSlice.actions
 

@@ -1,4 +1,6 @@
-import { configureStore } from '@reduxjs/toolkit'
+import { configureStore, combineReducers } from '@reduxjs/toolkit'
+import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
 import authReducer from './slices/authSlice'
 import chatReducer from './slices/chatSlice'
 import dashboardReducer from './slices/dashboardSlice'
@@ -7,21 +9,35 @@ import complianceReducer from './slices/complianceSlice'
 import contextFeedReducer from './slices/contextFeedSlice'
 import uiReducer from './slices/uiSlice'
 
+const rootReducer = combineReducers({
+  auth: authReducer,
+  chat: chatReducer,
+  dashboard: dashboardReducer,
+  knowledge: knowledgeReducer,
+  compliance: complianceReducer,
+  contextFeed: contextFeedReducer,
+  ui: uiReducer,
+})
+
+const persistConfig = {
+  key: 'root',
+  storage,
+  whitelist: ['auth', 'ui', 'chat', 'knowledge'], // Slices to persist across refresh
+}
+
+const persistedReducer = persistReducer(persistConfig, rootReducer)
+
 export const store = configureStore({
-  reducer: {
-    auth: authReducer,
-    chat: chatReducer,
-    dashboard: dashboardReducer,
-    knowledge: knowledgeReducer,
-    compliance: complianceReducer,
-    contextFeed: contextFeedReducer,
-    ui: uiReducer,
-  },
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
-      serializableCheck: false,
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+      },
     }),
 })
+
+export const persistor = persistStore(store)
 
 export type RootState = ReturnType<typeof store.getState>
 export type AppDispatch = typeof store.dispatch

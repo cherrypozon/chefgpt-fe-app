@@ -22,6 +22,7 @@ export {
   setIsTyping, 
   addMessage, 
   clearMessages,
+  clearPendingArtifact,
   clearError as clearChatError 
 } from './slices/chatSlice'
 

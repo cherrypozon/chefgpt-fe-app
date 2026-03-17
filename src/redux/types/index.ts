@@ -108,6 +108,7 @@ export interface ChatState {
   models: Model[]
   shortcuts: Shortcut[]
   selectedModel: Model | null
+  pendingArtifact: Artifact | null
   isTyping: boolean
   isLoading: boolean
   error: string | null

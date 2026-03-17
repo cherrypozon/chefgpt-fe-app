@@ -18,10 +18,10 @@ import {
   toggleRecording,
   setActiveArtifact,
   clearActiveArtifact,
+  clearPendingArtifact,
 } from '../../redux'
 import type { RootState } from '../../redux/store'
 
-// Static UI config (shortcuts and context tags)
 const SHORTCUTS = [
   { icon: FileText,      text: "Optimize tonight's menu" },
   { icon: AlertTriangle, text: 'Fix high-waste dishes', iconClassName: 'text-green-500' },
@@ -54,6 +54,7 @@ const Conversation = () => {
   const selectedModel = useAppSelector((state: RootState) => state.chat.selectedModel)
   const models = useAppSelector((state: RootState) => state.chat.models)
   const activeChatId = useAppSelector((state: RootState) => state.chat.activeChatId)
+  const pendingArtifact = useAppSelector((state: RootState) => state.chat.pendingArtifact)
   const input = useAppSelector((state: RootState) => state.ui.input)
   const modelOpen = useAppSelector((state: RootState) => state.ui.modelOpen)
   const attachedFiles = useAppSelector((state: RootState) => state.ui.attachedFiles)
@@ -64,11 +65,21 @@ const Conversation = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const modelRef = useRef<HTMLDivElement>(null)
 
-  // Fetch messages when chat changes
+  // Fetch initial messages only if not already loaded (persisted)
   useEffect(() => {
-    dispatch(chatThunks.fetchMessages(activeChatId))
+    if (messages.length === 0) {
+      dispatch(chatThunks.fetchMessages(activeChatId))
+    }
     dispatch(clearActiveArtifact())
-  }, [activeChatId, dispatch])
+  }, [activeChatId, dispatch, messages.length])
+
+  // Auto-show artifact when AI responds with one
+  useEffect(() => {
+    if (pendingArtifact) {
+      dispatch(setActiveArtifact(pendingArtifact))
+      dispatch(clearPendingArtifact())
+    }
+  }, [pendingArtifact, dispatch])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })

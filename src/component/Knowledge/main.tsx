@@ -30,8 +30,11 @@ const Knowledge = () => {
   )
 
   useEffect(() => {
-    dispatch(knowledgeThunks.fetchDocuments())
-  }, [dispatch])
+    // Only fetch if documents not already loaded (persisted state)
+    if (docs.length === 0) {
+      dispatch(knowledgeThunks.fetchDocuments())
+    }
+  }, [dispatch, docs.length])
 
   const simulateUpload = () => {
     // Create a mock file for demo purposes
